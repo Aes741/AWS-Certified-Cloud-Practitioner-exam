@@ -12,6 +12,27 @@
             background-color: #f3f4f6;
             color: #1f2937;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 400px;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -76,8 +97,8 @@
             </button>
         </div>
 
-        <!-- Leaderboard section (Initially hidden) -->
-        <div id="leaderboard-section" class="hidden mt-8">
+        <!-- Leaderboard section -->
+        <div id="leaderboard-section" class="mt-8">
             <h2 class="text-2xl font-semibold text-center mb-4 text-gray-800">Leaderboard</h2>
             <table class="w-full text-left table-auto border-collapse border border-gray-200 rounded-lg">
                 <thead class="bg-gray-200">
@@ -92,51 +113,21 @@
             </table>
         </div>
     </div>
+
+    <!-- Custom Modal -->
+    <div id="custom-alert-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex flex-col items-center">
+                <p id="modal-message" class="text-gray-700 font-medium mb-4"></p>
+                <button id="modal-close-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full transition-transform transform hover:scale-105 duration-300">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
     
-    <!-- Firestore and Firebase Auth -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firebase Configuration (DO NOT CHANGE)
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        let app, db, auth, userId, userName;
-
-        setLogLevel('debug');
-        
-        // Initialize Firebase
-        if (Object.keys(firebaseConfig).length) {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-            
-            // Sign in anonymously or with custom token
-            async function authenticate() {
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                    userId = auth.currentUser.uid;
-                    console.log("Firebase user ID:", userId);
-                    loadLeaderboard();
-                } catch (error) {
-                    console.error("Firebase authentication error:", error);
-                }
-            }
-            
-            authenticate();
-        } else {
-            console.warn("Firebase config not available. App will run in standalone mode without database features.");
-        }
-
+    <!-- Local Storage Logic -->
+    <script>
         const gameName = "AWS Cloud Practitioner Challenge";
         const questions = [
             {
@@ -169,12 +160,12 @@
         let currentQuestionIndex = 0;
         let score = 0;
         let userResponses = [];
+        let userName = '';
 
-        // Elementos de la nueva interfaz para el nombre de usuario
+        // Elementos de la interfaz
         const nameInputSection = document.getElementById('name-input-section');
         const usernameInput = document.getElementById('username-input');
         const submitNameButton = document.getElementById('submit-name-button');
-
         const descriptionSection = document.getElementById('description-section');
         const quizSection = document.getElementById('quiz-section');
         const resultsSection = document.getElementById('results-section');
@@ -190,19 +181,33 @@
         const leaderboardSection = document.getElementById('leaderboard-section');
         const leaderboardBody = document.getElementById('leaderboard-body');
         
-        totalQuestionsSpan.textContent = questions.length;
+        // Modal elements
+        const modal = document.getElementById('custom-alert-modal');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseButton = document.getElementById('modal-close-button');
 
-        // Listener para el botón de enviar nombre
+        function showModal(message) {
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
+        }
+
+        modalCloseButton.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+        
+        totalQuestionsSpan.textContent = questions.length;
+        loadLeaderboard();
+
+        // Listener for the name submission button
         submitNameButton.addEventListener('click', () => {
             const name = usernameInput.value.trim();
             if (name) {
                 userName = name;
                 nameInputSection.classList.add('hidden');
                 descriptionSection.classList.remove('hidden');
-                leaderboardSection.classList.add('hidden'); // Ocultar la tabla de clasificación cuando se introduce el nombre
+                leaderboardSection.classList.add('hidden');
             } else {
-                // Puedes agregar un cuadro de mensaje más sofisticado aquí
-                alert("Por favor, introduce tu nombre para continuar.");
+                showModal("Please enter your name to continue.");
             }
         });
 
@@ -292,52 +297,37 @@
             saveResults();
         }
 
-        async function saveResults() {
-            if (!db || !userId) return;
-            try {
-                const leaderboardCollection = collection(db, `/artifacts/${appId}/public/data/leaderboard`);
-                // Se agrega el nombre de usuario al documento
-                await addDoc(leaderboardCollection, {
-                    game: gameName,
-                    score: score,
-                    totalQuestions: questions.length,
-                    timestamp: serverTimestamp(),
-                    userId: userId,
-                    userName: userName // <-- Nuevo campo para el nombre
-                });
-                console.log("Results saved successfully!");
-            } catch (e) {
-                console.error("Error adding document: ", e);
-            }
+        function saveResults() {
+            let leaderboard = JSON.parse(localStorage.getItem('awsQuizLeaderboard')) || [];
+            
+            leaderboard.push({
+                userName: userName,
+                score: score,
+                totalQuestions: questions.length,
+                timestamp: new Date().toISOString()
+            });
+
+            leaderboard.sort((a, b) => b.score - a.score);
+
+            localStorage.setItem('awsQuizLeaderboard', JSON.stringify(leaderboard));
+            
+            loadLeaderboard();
         }
         
         function loadLeaderboard() {
-            if (!db) return;
-            const leaderboardCollection = collection(db, `/artifacts/${appId}/public/data/leaderboard`);
-            const q = query(leaderboardCollection);
-
-            onSnapshot(q, (querySnapshot) => {
-                const leaderboard = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    leaderboard.push({
-                        id: doc.id,
-                        // Se usa el nombre de usuario en lugar del ID
-                        userDisplay: data.userName || data.userId, 
-                        score: data.score,
-                        totalQuestions: data.totalQuestions,
-                        timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
-                    });
-                });
-                
-                leaderboard.sort((a, b) => b.score - a.score || b.timestamp - a.timestamp);
-
-                leaderboardBody.innerHTML = '';
+            const leaderboard = JSON.parse(localStorage.getItem('awsQuizLeaderboard')) || [];
+            
+            leaderboardBody.innerHTML = '';
+            if (leaderboard.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="3" class="px-4 py-2 text-center text-gray-500">No hay puntuaciones aún. ¡Sé el primero en jugar!</td>`;
+                leaderboardBody.appendChild(row);
+            } else {
                 leaderboard.forEach((entry) => {
                     const row = document.createElement('tr');
-                    const userIdCell = document.createElement('td');
-                    userIdCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200');
-                    userIdCell.textContent = entry.userDisplay;
+                    const userNameCell = document.createElement('td');
+                    userNameCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200');
+                    userNameCell.textContent = entry.userName;
                     
                     const scoreCell = document.createElement('td');
                     scoreCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200', 'text-center');
@@ -345,14 +335,14 @@
                     
                     const dateCell = document.createElement('td');
                     dateCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200', 'text-right');
-                    dateCell.textContent = entry.timestamp.toLocaleString();
+                    dateCell.textContent = new Date(entry.timestamp).toLocaleString();
                     
-                    row.appendChild(userIdCell);
+                    row.appendChild(userNameCell);
                     row.appendChild(scoreCell);
                     row.appendChild(dateCell);
                     leaderboardBody.appendChild(row);
                 });
-            });
+            }
         }
         
         startButton.addEventListener('click', () => {
@@ -366,9 +356,9 @@
 
         restartButton.addEventListener('click', () => {
             resultsSection.classList.add('hidden');
-            leaderboardSection.classList.add('hidden');
+            leaderboardSection.classList.remove('hidden');
             nameInputSection.classList.remove('hidden');
-            usernameInput.value = ''; // Limpia el nombre
+            usernameInput.value = '';
         });
 
         nextButton.addEventListener('click', () => {
