@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Cloud Practitioner Challenge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div id="game-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg w-full max-w-lg transition-all duration-300 transform scale-100">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-indigo-700">AWS Cloud Practitioner Challenge</h1>
+        <p class="text-center text-gray-600 mb-8 text-sm sm:text-base">Get ready for the AWS exam with this Q&A game!</p>
+
+        <!-- Game Description Section -->
+        <div id="description-section" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Game Description</h2>
+            <p class="text-gray-700 leading-relaxed text-sm sm:text-base mb-4">
+                The objective of this game is to test your knowledge of AWS services, preparing you for the AWS Certified Cloud Practitioner certification exam. The game consists of a series of multiple-choice questions.
+            </p>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Game Instructions</h2>
+            <ul class="list-disc list-inside text-gray-700 leading-relaxed text-sm sm:text-base space-y-2 mb-4">
+                <li>Read each question carefully.</li>
+                <li>Select the answer you think is correct.</li>
+                <li>Click "Next" to move to the next question.</li>
+                <li>At the end of the game, you will see your score and can review your answers.</li>
+                <li>This game will help you strengthen your knowledge for the AWS exam. Have fun and learn!</li>
+            </ul>
+            <div class="flex justify-center">
+                <button id="start-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300">
+                    Start the Game
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Section (Initially hidden) -->
+        <div id="quiz-section" class="hidden">
+            <div class="mb-6 bg-indigo-50 p-4 rounded-xl">
+                <p class="text-indigo-700 text-center font-bold text-lg"><span id="question-number">1</span> of <span id="total-questions">5</span></p>
+            </div>
+            <div id="quiz-box" class="bg-gray-50 p-6 rounded-xl shadow-inner mb-6 transition-opacity duration-500 opacity-100">
+                <p id="question-text" class="text-lg sm:text-xl font-medium mb-6 text-gray-800 leading-relaxed"></p>
+                <div id="answers-container" class="space-y-4"></div>
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button id="next-button" class="bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-full transition-colors duration-300 cursor-not-allowed" disabled>
+                    Next
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section (Initially hidden) -->
+        <div id="results-section" class="hidden text-center">
+            <h2 class="text-3xl font-bold text-indigo-700 mb-4">Game Over!</h2>
+            <p id="score-text" class="text-2xl font-semibold mb-4 text-gray-800"></p>
+            <p class="text-gray-600 mb-6">Review your answers below:</p>
+            <div id="review-container" class="text-left space-y-4 mb-6"></div>
+            <button id="restart-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300">
+                Play Again
+            </button>
+        </div>
+
+        <!-- Leaderboard section (Initially hidden) -->
+        <div id="leaderboard-section" class="hidden mt-8">
+            <h2 class="text-2xl font-semibold text-center mb-4 text-gray-800">Leaderboard</h2>
+            <table class="w-full text-left table-auto border-collapse border border-gray-200 rounded-lg">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="px-4 py-2 border-b-2 border-gray-300">User</th>
+                        <th class="px-4 py-2 border-b-2 border-gray-300 text-center">Score</th>
+                        <th class="px-4 py-2 border-b-2 border-gray-300 text-right">Date</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Firestore and Firebase Auth -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration (DO NOT CHANGE)
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        let app, db, auth, userId;
+
+        setLogLevel('debug');
+        
+        // Initialize Firebase
+        if (Object.keys(firebaseConfig).length) {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            
+            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+            
+            // Sign in anonymously or with custom token
+            async function authenticate() {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    userId = auth.currentUser.uid;
+                    console.log("Firebase user ID:", userId);
+                    loadLeaderboard();
+                } catch (error) {
+                    console.error("Firebase authentication error:", error);
+                }
+            }
+            
+            authenticate();
+        } else {
+            console.warn("Firebase config not available. App will run in standalone mode without database features.");
+        }
+
+        const gameName = "AWS Cloud Practitioner Challenge";
+        const questions = [
+            {
+                question: "What is the native AWS monitoring service for gathering and displaying actionable reports and meaningful metrics for AWS workloads?",
+                answers: ["CloudTrail", "CloudFormation", "CloudWatch", "CloudFront"],
+                correct: "CloudWatch"
+            },
+            {
+                question: "Which AWS service offers 'insight' to automatically detect unusual API activity on AWS accounts?",
+                answers: ["CloudWatch", "CloudTrail", "CloudFormation", "CloudFront"],
+                correct: "CloudTrail"
+            },
+            {
+                question: "Which AWS cloud deployment model is most often used to migrate, expand, or grow infrastructure to a cloud solution while linking internal systems to AWS Cloud resources?",
+                answers: ["Public cloud", "Hybrid", "Multi-cloud", "Private cloud"],
+                correct: "Hybrid"
+            },
+            {
+                question: "What component is used to apply the Web Application Firewall (WAF)?",
+                answers: ["Security groups", "WAF", "Web access control lists (web ACLs)", "Network access control lists (NACLs)"],
+                correct: "Web access control lists (web ACLs)"
+            },
+            {
+                question: "What term describes the responsibility for operations and security between the provider and the consumer, depending on the type and level of service?",
+                answers: ["Shared responsibility model", "AWS Well-Architected Framework", "Customer responsibility", "AWS responsibility"],
+                correct: "Shared responsibility model"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userResponses = [];
+
+        const descriptionSection = document.getElementById('description-section');
+        const quizSection = document.getElementById('quiz-section');
+        const resultsSection = document.getElementById('results-section');
+        const startButton = document.getElementById('start-button');
+        const questionNumberSpan = document.getElementById('question-number');
+        const totalQuestionsSpan = document.getElementById('total-questions');
+        const questionText = document.getElementById('question-text');
+        const answersContainer = document.getElementById('answers-container');
+        const nextButton = document.getElementById('next-button');
+        const scoreText = document.getElementById('score-text');
+        const reviewContainer = document.getElementById('review-container');
+        const restartButton = document.getElementById('restart-button');
+        const leaderboardSection = document.getElementById('leaderboard-section');
+        const leaderboardBody = document.getElementById('leaderboard-body');
+        
+        totalQuestionsSpan.textContent = questions.length;
+
+        function showQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionNumberSpan.textContent = currentQuestionIndex + 1;
+            questionText.textContent = currentQuestion.question;
+            answersContainer.innerHTML = '';
+            
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.textContent = answer;
+                button.classList.add('w-full', 'bg-white', 'text-left', 'p-4', 'rounded-xl', 'shadow-sm', 'hover:bg-indigo-100', 'hover:text-indigo-800', 'transition-colors', 'duration-200', 'border', 'border-gray-200', 'focus:outline-none', 'focus:ring-2', 'focus:ring-indigo-500');
+                button.onclick = () => selectAnswer(answer, button);
+                answersContainer.appendChild(button);
+            });
+            
+            nextButton.classList.add('cursor-not-allowed', 'bg-gray-300', 'text-gray-700');
+            nextButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'text-white');
+            nextButton.disabled = true;
+        }
+
+        function selectAnswer(selectedAnswer, selectedButton) {
+            const allButtons = answersContainer.querySelectorAll('button');
+            const currentQuestion = questions[currentQuestionIndex];
+            
+            allButtons.forEach(button => {
+                button.disabled = true;
+                if (button.textContent === currentQuestion.correct) {
+                    button.classList.add('bg-green-100', 'text-green-800', 'border-green-400');
+                } else if (button.textContent === selectedAnswer) {
+                    button.classList.add('bg-red-100', 'text-red-800', 'border-red-400');
+                }
+            });
+            
+            const isCorrect = selectedAnswer === currentQuestion.correct;
+            if (isCorrect) {
+                score++;
+            }
+
+            userResponses[currentQuestionIndex] = {
+                question: currentQuestion.question,
+                selected: selectedAnswer,
+                correct: currentQuestion.correct,
+                isCorrect: isCorrect
+            };
+
+            nextButton.disabled = false;
+            nextButton.classList.remove('cursor-not-allowed', 'bg-gray-300', 'text-gray-700');
+            nextButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700', 'text-white');
+        }
+
+        function showResults() {
+            quizSection.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            leaderboardSection.classList.remove('hidden');
+            scoreText.textContent = `Your score is: ${score} out of ${questions.length}`;
+
+            reviewContainer.innerHTML = '';
+            userResponses.forEach((response, index) => {
+                const reviewItem = document.createElement('div');
+                reviewItem.classList.add('bg-gray-50', 'p-4', 'rounded-xl');
+                
+                const questionP = document.createElement('p');
+                questionP.classList.add('font-semibold', 'mb-2');
+                questionP.textContent = `Question ${index + 1}: ${response.question}`;
+                
+                const correctP = document.createElement('p');
+                correctP.classList.add('text-green-600', 'text-sm');
+                correctP.innerHTML = `**Correct answer:** ${response.correct}`;
+                
+                const userP = document.createElement('p');
+                userP.classList.add('text-sm');
+                if (response.isCorrect) {
+                    userP.classList.add('text-green-600');
+                    userP.innerHTML = `**Your answer:** ${response.selected} (Correct)`;
+                } else {
+                    userP.classList.add('text-red-600');
+                    userP.innerHTML = `**Your answer:** ${response.selected} (Incorrect)`;
+                }
+
+                reviewItem.appendChild(questionP);
+                reviewItem.appendChild(userP);
+                reviewItem.appendChild(correctP);
+                reviewContainer.appendChild(reviewItem);
+            });
+            saveResults();
+        }
+
+        async function saveResults() {
+            if (!db || !userId) return;
+            try {
+                const leaderboardCollection = collection(db, `/artifacts/${appId}/public/data/leaderboard`);
+                await addDoc(leaderboardCollection, {
+                    game: gameName,
+                    score: score,
+                    totalQuestions: questions.length,
+                    timestamp: serverTimestamp(),
+                    userId: userId
+                });
+                console.log("Results saved successfully!");
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        }
+        
+        function loadLeaderboard() {
+            if (!db) return;
+            const leaderboardCollection = collection(db, `/artifacts/${appId}/public/data/leaderboard`);
+            const q = query(leaderboardCollection);
+
+            onSnapshot(q, (querySnapshot) => {
+                const leaderboard = [];
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    leaderboard.push({
+                        id: doc.id,
+                        userId: data.userId,
+                        score: data.score,
+                        totalQuestions: data.totalQuestions,
+                        timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
+                    });
+                });
+                
+                leaderboard.sort((a, b) => b.score - a.score || b.timestamp - a.timestamp);
+
+                leaderboardBody.innerHTML = '';
+                leaderboard.forEach((entry) => {
+                    const row = document.createElement('tr');
+                    const userIdCell = document.createElement('td');
+                    userIdCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200');
+                    userIdCell.textContent = entry.userId;
+                    
+                    const scoreCell = document.createElement('td');
+                    scoreCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200', 'text-center');
+                    scoreCell.textContent = `${entry.score} / ${entry.totalQuestions}`;
+                    
+                    const dateCell = document.createElement('td');
+                    dateCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200', 'text-right');
+                    dateCell.textContent = entry.timestamp.toLocaleString();
+                    
+                    row.appendChild(userIdCell);
+                    row.appendChild(scoreCell);
+                    row.appendChild(dateCell);
+                    leaderboardBody.appendChild(row);
+                });
+            });
+        }
+        
+        startButton.addEventListener('click', () => {
+            descriptionSection.classList.add('hidden');
+            quizSection.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            userResponses = [];
+            showQuestion();
+        });
+
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        restartButton.addEventListener('click', () => {
+            resultsSection.classList.add('hidden');
+            leaderboardSection.classList.add('hidden');
+            descriptionSection.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
