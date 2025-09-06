@@ -19,8 +19,17 @@
         <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-indigo-700">AWS Cloud Practitioner Challenge</h1>
         <p class="text-center text-gray-600 mb-8 text-sm sm:text-base">Get ready for the AWS exam with this Q&A game!</p>
 
-        <!-- Game Description Section -->
-        <div id="description-section" class="mb-8">
+        <!-- Name Input Section -->
+        <div id="name-input-section" class="flex flex-col items-center mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Enter Your Name</h2>
+            <input type="text" id="username-input" class="w-full max-w-sm p-3 border border-gray-300 rounded-lg text-lg mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Your Name">
+            <button id="submit-name-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300">
+                Continue
+            </button>
+        </div>
+
+        <!-- Game Description Section (Initially hidden) -->
+        <div id="description-section" class="hidden">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Game Description</h2>
             <p class="text-gray-700 leading-relaxed text-sm sm:text-base mb-4">
                 The objective of this game is to test your knowledge of AWS services, preparing you for the AWS Certified Cloud Practitioner certification exam. The game consists of a series of multiple-choice questions.
@@ -95,7 +104,7 @@
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        let app, db, auth, userId;
+        let app, db, auth, userId, userName;
 
         setLogLevel('debug');
         
@@ -161,6 +170,11 @@
         let score = 0;
         let userResponses = [];
 
+        // Elementos de la nueva interfaz para el nombre de usuario
+        const nameInputSection = document.getElementById('name-input-section');
+        const usernameInput = document.getElementById('username-input');
+        const submitNameButton = document.getElementById('submit-name-button');
+
         const descriptionSection = document.getElementById('description-section');
         const quizSection = document.getElementById('quiz-section');
         const resultsSection = document.getElementById('results-section');
@@ -177,6 +191,19 @@
         const leaderboardBody = document.getElementById('leaderboard-body');
         
         totalQuestionsSpan.textContent = questions.length;
+
+        // Listener para el botón de enviar nombre
+        submitNameButton.addEventListener('click', () => {
+            const name = usernameInput.value.trim();
+            if (name) {
+                userName = name;
+                nameInputSection.classList.add('hidden');
+                descriptionSection.classList.remove('hidden');
+            } else {
+                // You can add a more sophisticated message box here
+                console.log("Please enter your name to continue.");
+            }
+        });
 
         function showQuestion() {
             const currentQuestion = questions[currentQuestionIndex];
@@ -268,12 +295,14 @@
             if (!db || !userId) return;
             try {
                 const leaderboardCollection = collection(db, `/artifacts/${appId}/public/data/leaderboard`);
+                // Se agrega el nombre de usuario al documento
                 await addDoc(leaderboardCollection, {
                     game: gameName,
                     score: score,
                     totalQuestions: questions.length,
                     timestamp: serverTimestamp(),
-                    userId: userId
+                    userId: userId,
+                    userName: userName // <-- Nuevo campo para el nombre
                 });
                 console.log("Results saved successfully!");
             } catch (e) {
@@ -292,7 +321,8 @@
                     const data = doc.data();
                     leaderboard.push({
                         id: doc.id,
-                        userId: data.userId,
+                        // Se usa el nombre de usuario en lugar del ID
+                        userDisplay: data.userName || data.userId, 
                         score: data.score,
                         totalQuestions: data.totalQuestions,
                         timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
@@ -306,7 +336,7 @@
                     const row = document.createElement('tr');
                     const userIdCell = document.createElement('td');
                     userIdCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200');
-                    userIdCell.textContent = entry.userId;
+                    userIdCell.textContent = entry.userDisplay;
                     
                     const scoreCell = document.createElement('td');
                     scoreCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200', 'text-center');
@@ -333,6 +363,13 @@
             showQuestion();
         });
 
+        restartButton.addEventListener('click', () => {
+            resultsSection.classList.add('hidden');
+            leaderboardSection.classList.add('hidden');
+            nameInputSection.classList.remove('hidden');
+            usernameInput.value = ''; // Limpia el nombre
+        });
+
         nextButton.addEventListener('click', () => {
             currentQuestionIndex++;
             if (currentQuestionIndex < questions.length) {
@@ -340,12 +377,6 @@
             } else {
                 showResults();
             }
-        });
-
-        restartButton.addEventListener('click', () => {
-            resultsSection.classList.add('hidden');
-            leaderboardSection.classList.add('hidden');
-            descriptionSection.classList.remove('hidden');
         });
     </script>
 </body>
