@@ -199,9 +199,10 @@
                 userName = name;
                 nameInputSection.classList.add('hidden');
                 descriptionSection.classList.remove('hidden');
+                leaderboardSection.classList.add('hidden'); // Ocultar la tabla de clasificación cuando se introduce el nombre
             } else {
-                // You can add a more sophisticated message box here
-                console.log("Please enter your name to continue.");
+                // Puedes agregar un cuadro de mensaje más sofisticado aquí
+                alert("Por favor, introduce tu nombre para continuar.");
             }
         });
 
