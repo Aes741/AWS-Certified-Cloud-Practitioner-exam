@@ -33,6 +33,26 @@
             max-width: 90%;
             width: 400px;
         }
+
+        /* Responsive table styles */
+        @media (max-width: 640px) {
+            .leaderboard-table th, .leaderboard-table td {
+                display: block;
+                width: 100%;
+                text-align: left;
+                padding: 8px 16px;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            .leaderboard-table th {
+                font-weight: 700;
+                background-color: #f9fafb;
+            }
+            .leaderboard-table td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                margin-right: 8px;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -100,7 +120,7 @@
         <!-- Leaderboard section -->
         <div id="leaderboard-section" class="mt-8">
             <h2 class="text-2xl font-semibold text-center mb-4 text-gray-800">Leaderboard</h2>
-            <table class="w-full text-left table-auto border-collapse border border-gray-200 rounded-lg">
+            <table class="w-full text-left table-auto border-collapse border border-gray-200 rounded-lg leaderboard-table">
                 <thead class="bg-gray-200">
                     <tr>
                         <th class="px-4 py-2 border-b-2 border-gray-300">User</th>
@@ -162,7 +182,7 @@
         let userResponses = [];
         let userName = '';
 
-        // Elementos de la interfaz
+        // UI elements
         const nameInputSection = document.getElementById('name-input-section');
         const usernameInput = document.getElementById('username-input');
         const submitNameButton = document.getElementById('submit-name-button');
@@ -320,22 +340,26 @@
             leaderboardBody.innerHTML = '';
             if (leaderboard.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="3" class="px-4 py-2 text-center text-gray-500">No hay puntuaciones aún. ¡Sé el primero en jugar!</td>`;
+                row.innerHTML = `<td colspan="3" class="px-4 py-2 text-center text-gray-500">No scores yet. Be the first to play!</td>`;
                 leaderboardBody.appendChild(row);
             } else {
                 leaderboard.forEach((entry) => {
                     const row = document.createElement('tr');
+                    
                     const userNameCell = document.createElement('td');
                     userNameCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200');
                     userNameCell.textContent = entry.userName;
-                    
+                    userNameCell.setAttribute('data-label', 'User');
+
                     const scoreCell = document.createElement('td');
                     scoreCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200', 'text-center');
                     scoreCell.textContent = `${entry.score} / ${entry.totalQuestions}`;
+                    scoreCell.setAttribute('data-label', 'Score');
                     
                     const dateCell = document.createElement('td');
                     dateCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200', 'text-right');
                     dateCell.textContent = new Date(entry.timestamp).toLocaleString();
+                    dateCell.setAttribute('data-label', 'Date');
                     
                     row.appendChild(userNameCell);
                     row.appendChild(scoreCell);
