@@ -122,8 +122,7 @@
                         <th class="px-4 py-2 border-b-2 border-gray-300 text-right">Date</th>
                     </tr>
                 </thead>
-                <tbody id="leaderboard-body">
-                </tbody>
+                <tbody id="leaderboard-body"></tbody>
             </table>
         </div>
         
@@ -143,16 +142,24 @@
     
     <script>
         const questions = [
+            // Original 5
+            { question: "What is the native AWS monitoring service for gathering and displaying actionable reports and meaningful metrics for AWS workloads?", answers: ["CloudTrail", "CloudFormation", "CloudWatch", "CloudFront"], correct: "CloudWatch" },
+            { question: "Which AWS service offers 'insights' to automatically detect unusual API activities in AWS accounts?", answers: ["CloudTrail", "Trusted Advisor", "CloudFront", "CloudWatch"], correct: "CloudTrail" },
+            { question: "Which AWS cloud deployment model is most often used to migrate, expand, or grow infrastructure into a cloud solution while linking internal systems to AWS Cloud resources?", answers: ["Community", "Hybrid", "Cloud-based", "On-premises"], correct: "Hybrid" },
+            { question: "Which component is used to apply the web application firewall (WAF)?", answers: ["Security groups", "Network access control lists (NACLS)", "Web access control lists (web ACLS)", "Elastic network interfaces (ENIs)"], correct: "Web access control lists (web ACLS)" },
+            { question: "Which term describes the accountability of operations and security between the provider and consumer depending on the type and level of service?", answers: ["Memorandum of Understanding (MoU)", "Risk treatment", "Shared responsibility model", "Service Level Agreement (SLA)"], correct: "Shared responsibility model" },
+
+            // New 10
             { question: "Which AWS cloud service provides virtualized computing resources over the internet?", answers: ["SaaS", "PaaS", "IaaS", "CaaS"], correct: "IaaS" },
             { question: "Which cloud service type allows DevOps teams to focus on the rapid and efficient deployment of apps, managed databases, containers, and microservices?", answers: ["SaaS", "PaaS", "IaaS", "FaaS"], correct: "PaaS" },
             { question: "What term describes the cloud feature that allows resources to automatically scale up or down based on demand?", answers: ["Elasticity", "High Availability", "Durability", "Redundancy"], correct: "Elasticity" },
-            { question: "Which AWS cloud deployment model is most often used to migrate, expand, or grow infrastructure into a cloud solution while linking internal systems to AWS Cloud resources?", answers: ["Community", "Hybrid", "Cloud-based", "On-premises"], correct: "Hybrid" },
             { question: "As of 2022, every AWS Region has at least how many Availability Zones?", answers: ["1", "2", "3", "4"], correct: "2" },
             { question: "Which cloud service type provides a platform to develop, run, and manage applications without managing the underlying infrastructure?", answers: ["IaaS", "PaaS", "SaaS", "CaaS"], correct: "PaaS" },
             { question: "What does SaaS stand for?", answers: ["System as a Service", "Software as a Service", "Storage as a Service", "Security as a Service"], correct: "Software as a Service" },
-            { question: "Which AWS cloud service provides compute, storage, and networking infrastructure for customers to use on-demand?", answers: ["IaaS", "PaaS", "SaaS", "FaaS"], correct: "IaaS" },
-            { question: "What term describes the speed and flexibility a business gains by using cloud computing?", answers: ["Elasticity", "Agility", "Scalability", "Resiliency"], correct: "Agility" },
-            { question: "In the AWS Pricing Calculator, what is listed in the Service Name column of the estimate which has just been created?", answers: ["The AWS service being estimated (e.g., EC2, S3)", "The estimated cost", "The number of resources", "The region selected"], correct: "The AWS service being estimated (e.g., EC2, S3)" }
+            { question: "Which AWS cloud service provides compute, storage, and networking resources in a highly scalable way?", answers: ["IaaS", "SaaS", "PaaS", "FaaS"], correct: "IaaS" },
+            { question: "Which AWS pricing tool helps estimate costs for different cloud services?", answers: ["Cost Explorer", "Pricing Calculator", "Billing Dashboard", "Trusted Advisor"], correct: "Pricing Calculator" },
+            { question: "Which AWS cloud concept ensures that data is stored in multiple locations for fault tolerance?", answers: ["Redundancy", "Elasticity", "Availability Zone", "Shared Responsibility"], correct: "Redundancy" },
+            { question: "Which AWS service allows you to deploy and manage serverless applications?", answers: ["Lambda", "EC2", "S3", "RDS"], correct: "Lambda" }
         ];
 
         let currentQuestionIndex = 0;
@@ -160,6 +167,7 @@
         let userResponses = [];
         let userName = '';
 
+        // UI elements
         const nameInputSection = document.getElementById('name-input-section');
         const usernameInput = document.getElementById('username-input');
         const submitNameButton = document.getElementById('submit-name-button');
@@ -175,24 +183,15 @@
         const scoreText = document.getElementById('score-text');
         const reviewContainer = document.getElementById('review-container');
         const restartButton = document.getElementById('restart-button');
-        const leaderboardSection = document.getElementById('leaderboard-section');
         const leaderboardBody = document.getElementById('leaderboard-body');
 
         const modal = document.getElementById('custom-alert-modal');
         const modalMessage = document.getElementById('modal-message');
         const modalCloseButton = document.getElementById('modal-close-button');
 
-        function showModal(message) {
-            modalMessage.textContent = message;
-            modal.style.display = 'flex';
-        }
-
-        modalCloseButton.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
+        modalCloseButton.addEventListener('click', () => { modal.style.display = 'none'; });
 
         totalQuestionsSpan.textContent = questions.length;
-        loadLeaderboard();
 
         submitNameButton.addEventListener('click', () => {
             const name = usernameInput.value.trim();
@@ -200,48 +199,45 @@
                 userName = name;
                 nameInputSection.classList.add('hidden');
                 descriptionSection.classList.remove('hidden');
-                leaderboardSection.classList.add('hidden');
             } else {
-                showModal("Please enter your name to continue.");
+                modalMessage.textContent = "Please enter your name to continue.";
+                modal.style.display = 'flex';
             }
         });
 
         function showQuestion() {
-            const currentQuestion = questions[currentQuestionIndex];
+            const current = questions[currentQuestionIndex];
             questionNumberSpan.textContent = currentQuestionIndex + 1;
-            questionText.textContent = currentQuestion.question;
+            questionText.textContent = current.question;
             answersContainer.innerHTML = '';
-            
-            currentQuestion.answers.forEach(answer => {
+
+            current.answers.forEach(answer => {
                 const button = document.createElement('button');
                 button.textContent = answer;
-                button.classList.add('w-full', 'bg-white', 'text-left', 'p-4', 'rounded-xl', 'shadow-sm', 'hover:bg-indigo-100', 'hover:text-indigo-800', 'transition-colors', 'duration-200', 'border', 'border-gray-200', 'focus:outline-none', 'focus:ring-2', 'focus:ring-indigo-500');
+                button.className = 'w-full bg-white text-left p-4 rounded-xl shadow-sm hover:bg-indigo-100 hover:text-indigo-800 transition-colors duration-200 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500';
                 button.onclick = () => selectAnswer(answer, button);
                 answersContainer.appendChild(button);
             });
-            
+
+            nextButton.disabled = true;
             nextButton.classList.add('cursor-not-allowed', 'bg-gray-300', 'text-gray-700');
             nextButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'text-white');
-            nextButton.disabled = true;
         }
 
-        function selectAnswer(selectedAnswer, selectedButton) {
-            const allButtons = answersContainer.querySelectorAll('button');
-            const currentQuestion = questions[currentQuestionIndex];
-            
-            allButtons.forEach(button => {
-                button.disabled = true;
-                if (button.textContent === currentQuestion.correct) {
-                    button.classList.add('bg-green-100', 'text-green-800', 'border-green-400');
-                } else if (button.textContent === selectedAnswer) {
-                    button.classList.add('bg-red-100', 'text-red-800', 'border-red-400');
-                }
-            });
-            
-            const isCorrect = selectedAnswer === currentQuestion.correct;
-            if (isCorrect) score++;
+        function selectAnswer(answer, btn) {
+            const current = questions[currentQuestionIndex];
+            const buttons = answersContainer.querySelectorAll('button');
 
-            userResponses[currentQuestionIndex] = { question: currentQuestion.question, selected: selectedAnswer, correct: currentQuestion.correct, isCorrect: isCorrect };
+            buttons.forEach(b => {
+                b.disabled = true;
+                if (b.textContent === current.correct) b.classList.add('bg-green-100', 'text-green-800', 'border-green-400');
+                if (b.textContent === answer && answer !== current.correct) b.classList.add('bg-red-100', 'text-red-800', 'border-red-400');
+            });
+
+            const correct = answer === current.correct;
+            if (correct) score++;
+
+            userResponses[currentQuestionIndex] = { question: current.question, selected: answer, correct: current.correct, isCorrect: correct };
 
             nextButton.disabled = false;
             nextButton.classList.remove('cursor-not-allowed', 'bg-gray-300', 'text-gray-700');
@@ -251,36 +247,16 @@
         function showResults() {
             quizSection.classList.add('hidden');
             resultsSection.classList.remove('hidden');
-            leaderboardSection.classList.remove('hidden');
             scoreText.textContent = `Your score is: ${score} out of ${questions.length}`;
 
             reviewContainer.innerHTML = '';
-            userResponses.forEach((response, index) => {
-                const reviewItem = document.createElement('div');
-                reviewItem.classList.add('bg-gray-50', 'p-4', 'rounded-xl');
-                
-                const questionP = document.createElement('p');
-                questionP.classList.add('font-semibold', 'mb-2');
-                questionP.textContent = `Question ${index + 1}: ${response.question}`;
-                
-                const correctP = document.createElement('p');
-                correctP.classList.add('text-green-600', 'text-sm');
-                correctP.innerHTML = `**Correct answer:** ${response.correct}`;
-                
-                const userP = document.createElement('p');
-                userP.classList.add('text-sm');
-                if (response.isCorrect) {
-                    userP.classList.add('text-green-600');
-                    userP.innerHTML = `**Your answer:** ${response.selected} (Correct)`;
-                } else {
-                    userP.classList.add('text-red-600');
-                    userP.innerHTML = `**Your answer:** ${response.selected} (Incorrect)`;
-                }
-
-                reviewItem.appendChild(questionP);
-                reviewItem.appendChild(userP);
-                reviewItem.appendChild(correctP);
-                reviewContainer.appendChild(reviewItem);
+            userResponses.forEach((r, i) => {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-50 p-4 rounded-xl';
+                div.innerHTML = `<p class="font-semibold mb-2">Question ${i+1}: ${r.question}</p>
+                <p class="${r.isCorrect ? 'text-green-600' : 'text-red-600'} text-sm">Your answer: ${r.selected} (${r.isCorrect ? 'Correct' : 'Incorrect'})</p>
+                <p class="text-green-600 text-sm">Correct answer: ${r.correct}</p>`;
+                reviewContainer.appendChild(div);
             });
             saveResults();
         }
@@ -288,44 +264,27 @@
         function saveResults() {
             let leaderboard = JSON.parse(localStorage.getItem('awsQuizLeaderboard')) || [];
             leaderboard.push({ userName, score, totalQuestions: questions.length, timestamp: new Date().toISOString() });
-            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard.sort((a,b) => b.score - a.score);
             localStorage.setItem('awsQuizLeaderboard', JSON.stringify(leaderboard));
             loadLeaderboard();
         }
-        
+
         function loadLeaderboard() {
             const leaderboard = JSON.parse(localStorage.getItem('awsQuizLeaderboard')) || [];
             leaderboardBody.innerHTML = '';
             if (leaderboard.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="3" class="px-4 py-2 text-center text-gray-500">No scores yet. Be the first to play!</td>`;
-                leaderboardBody.appendChild(row);
+                leaderboardBody.innerHTML = `<tr><td colspan="3" class="px-4 py-2 text-center text-gray-500">No scores yet. Be the first to play!</td></tr>`;
             } else {
                 leaderboard.forEach(entry => {
                     const row = document.createElement('tr');
-                    const userNameCell = document.createElement('td');
-                    userNameCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200');
-                    userNameCell.textContent = entry.userName;
-                    userNameCell.setAttribute('data-label', 'User');
-
-                    const scoreCell = document.createElement('td');
-                    scoreCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200', 'text-center');
-                    scoreCell.textContent = `${entry.score} / ${entry.totalQuestions}`;
-                    scoreCell.setAttribute('data-label', 'Score');
-                    
-                    const dateCell = document.createElement('td');
-                    dateCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200', 'text-right');
-                    dateCell.textContent = new Date(entry.timestamp).toLocaleString();
-                    dateCell.setAttribute('data-label', 'Date');
-                    
-                    row.appendChild(userNameCell);
-                    row.appendChild(scoreCell);
-                    row.appendChild(dateCell);
+                    row.innerHTML = `<td class="px-4 py-2 border-b border-gray-200" data-label="User">${entry.userName}</td>
+                    <td class="px-4 py-2 border-b border-gray-200 text-center" data-label="Score">${entry.score} / ${entry.totalQuestions}</td>
+                    <td class="px-4 py-2 border-b border-gray-200 text-right" data-label="Date">${new Date(entry.timestamp).toLocaleString()}</td>`;
                     leaderboardBody.appendChild(row);
                 });
             }
         }
-        
+
         startButton.addEventListener('click', () => {
             descriptionSection.classList.add('hidden');
             quizSection.classList.remove('hidden');
@@ -337,18 +296,14 @@
 
         restartButton.addEventListener('click', () => {
             resultsSection.classList.add('hidden');
-            leaderboardSection.classList.remove('hidden');
             nameInputSection.classList.remove('hidden');
             usernameInput.value = '';
         });
 
         nextButton.addEventListener('click', () => {
             currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) {
-                showQuestion();
-            } else {
-                showResults();
-            }
+            if (currentQuestionIndex < questions.length) showQuestion();
+            else showResults();
         });
     </script>
 </body>
