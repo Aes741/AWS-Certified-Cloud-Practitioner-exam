@@ -33,86 +33,63 @@
             max-width: 90%;
             width: 400px;
         }
-
-        @media (max-width: 640px) {
-            .leaderboard-table th, .leaderboard-table td {
-                display: block;
-                width: 100%;
-                text-align: left;
-                padding: 8px 16px;
-                border-bottom: 1px solid #e5e7eb;
-            }
-            .leaderboard-table th {
-                font-weight: 700;
-                background-color: #f9fafb;
-            }
-            .leaderboard-table td:before {
-                content: attr(data-label);
-                font-weight: 600;
-                margin-right: 8px;
-            }
-        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
-    <div id="game-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg w-full max-w-lg transition-all duration-300 transform scale-100">
-        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-indigo-700">AWS Cloud Practitioner Challenge</h1>
-        <p class="text-center text-gray-600 mb-8 text-sm sm:text-base">Get ready for the AWS exam with this Q&A game!</p>
+<div id="game-container" class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg w-full max-w-lg transition-all duration-300 transform scale-100">
 
-        <div id="name-input-section" class="flex flex-col items-center mb-8">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Enter Your Name</h2>
-            <input type="text" id="username-input" class="w-full max-w-sm p-3 border border-gray-300 rounded-lg text-lg mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Your Name">
-            <button id="submit-name-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300">
-                Continue
+    <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-indigo-700">AWS Cloud Practitioner Challenge</h1>
+
+    <!-- Name Input Section -->
+    <div id="name-input-section" class="flex flex-col items-center mb-8">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-800">Enter Your Name</h2>
+        <input type="text" id="username-input" class="w-full max-w-sm p-3 border border-gray-300 rounded-lg text-lg mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Your Name">
+        <button id="submit-name-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300">
+            Continue
+        </button>
+    </div>
+
+    <!-- Game Description Section -->
+    <div id="description-section" class="hidden">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-800">Game Instructions</h2>
+        <ul class="list-disc list-inside text-gray-700 leading-relaxed text-sm sm:text-base space-y-2 mb-4">
+            <li>Read each question carefully.</li>
+            <li>Select the answer you think is correct.</li>
+            <li>Click "Next" to move to the next question.</li>
+            <li>At the end, your score and leaderboard will be shown.</li>
+        </ul>
+        <div class="flex justify-center">
+            <button id="start-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300">
+                Start the Game
             </button>
         </div>
+    </div>
 
-        <div id="description-section" class="hidden">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Game Description</h2>
-            <p class="text-gray-700 leading-relaxed text-sm sm:text-base mb-4">
-                The objective of this game is to test your knowledge of AWS services, preparing you for the AWS Certified Cloud Practitioner certification exam. The game consists of a series of multiple-choice questions.
-            </p>
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Game Instructions</h2>
-            <ul class="list-disc list-inside text-gray-700 leading-relaxed text-sm sm:text-base space-y-2 mb-4">
-                <li>Read each question carefully.</li>
-                <li>Select the answer you think is correct.</li>
-                <li>Click "Next" to move to the next question.</li>
-                <li>At the end of the game, you will see your score and can review your answers.</li>
-                <li>This game will help you strengthen your knowledge for the AWS exam. Have fun and learn!</li>
-            </ul>
-            <div class="flex justify-center">
-                <button id="start-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300">
-                    Start the Game
-                </button>
-            </div>
+    <!-- Quiz Section -->
+    <div id="quiz-section" class="hidden">
+        <div class="mb-6 bg-indigo-50 p-4 rounded-xl">
+            <p class="text-indigo-700 text-center font-bold text-lg"><span id="question-number">1</span> of <span id="total-questions">10</span></p>
         </div>
-
-        <div id="quiz-section" class="hidden">
-            <div class="mb-6 bg-indigo-50 p-4 rounded-xl">
-                <p class="text-indigo-700 text-center font-bold text-lg"><span id="question-number">1</span> of <span id="total-questions">5</span></p>
-            </div>
-            <div id="quiz-box" class="bg-gray-50 p-6 rounded-xl shadow-inner mb-6 transition-opacity duration-500 opacity-100">
-                <p id="question-text" class="text-lg sm:text-xl font-medium mb-6 text-gray-800 leading-relaxed"></p>
-                <div id="answers-container" class="space-y-4"></div>
-            </div>
-            <div class="flex justify-between items-center mt-6">
-                <button id="next-button" class="bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-full transition-colors duration-300 cursor-not-allowed" disabled>
-                    Next
-                </button>
-            </div>
+        <div id="quiz-box" class="bg-gray-50 p-6 rounded-xl shadow-inner mb-6 transition-opacity duration-500 opacity-100">
+            <p id="question-text" class="text-lg sm:text-xl font-medium mb-6 text-gray-800 leading-relaxed"></p>
+            <div id="answers-container" class="space-y-4"></div>
         </div>
-
-        <div id="results-section" class="hidden text-center">
-            <h2 class="text-3xl font-bold text-indigo-700 mb-4">Game Over!</h2>
-            <p id="score-text" class="text-2xl font-semibold mb-4 text-gray-800"></p>
-            <p class="text-gray-600 mb-6">Review your answers below:</p>
-            <div id="review-container" class="text-left space-y-4 mb-6"></div>
-            <button id="restart-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300">
-                Play Again
+        <div class="flex justify-between items-center mt-6">
+            <button id="next-button" class="bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-full transition-colors duration-300 cursor-not-allowed" disabled>
+                Next
             </button>
         </div>
+    </div>
 
-        <div id="leaderboard-section" class="mt-8">
+    <!-- Results Section -->
+    <div id="results-section" class="hidden text-center">
+        <h2 class="text-3xl font-bold text-indigo-700 mb-4">Game Over!</h2>
+        <p id="score-text" class="text-2xl font-semibold mb-4 text-gray-800"></p>
+        <p class="text-gray-600 mb-6">Review your answers below:</p>
+        <div id="review-container" class="text-left space-y-4 mb-6"></div>
+
+        <!-- Leaderboard -->
+        <div id="leaderboard-section">
             <h2 class="text-2xl font-semibold text-center mb-4 text-gray-800">Leaderboard</h2>
             <table class="w-full text-left table-auto border-collapse border border-gray-200 rounded-lg leaderboard-table">
                 <thead class="bg-gray-200">
@@ -125,186 +102,188 @@
                 <tbody id="leaderboard-body"></tbody>
             </table>
         </div>
-        
-        <p class="text-center text-sm text-gray-400 mt-8">Created by Adrian Saltos</p>
+
+        <button id="restart-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 duration-300 mt-6">
+            Play Again
+        </button>
     </div>
 
-    <div id="custom-alert-modal" class="modal">
-        <div class="modal-content">
-            <div class="flex flex-col items-center">
-                <p id="modal-message" class="text-gray-700 font-medium mb-4"></p>
-                <button id="modal-close-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full transition-transform transform hover:scale-105 duration-300">
-                    OK
-                </button>
-            </div>
+</div>
+
+<!-- Modal -->
+<div id="custom-alert-modal" class="modal">
+    <div class="modal-content">
+        <div class="flex flex-col items-center">
+            <p id="modal-message" class="text-gray-700 font-medium mb-4"></p>
+            <button id="modal-close-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full transition-transform transform hover:scale-105 duration-300">
+                OK
+            </button>
         </div>
     </div>
-    
-    <script>
-        const questions = [
-            // Original 5
-            { question: "What is the native AWS monitoring service for gathering and displaying actionable reports and meaningful metrics for AWS workloads?", answers: ["CloudTrail", "CloudFormation", "CloudWatch", "CloudFront"], correct: "CloudWatch" },
-            { question: "Which AWS service offers 'insights' to automatically detect unusual API activities in AWS accounts?", answers: ["CloudTrail", "Trusted Advisor", "CloudFront", "CloudWatch"], correct: "CloudTrail" },
-            { question: "Which AWS cloud deployment model is most often used to migrate, expand, or grow infrastructure into a cloud solution while linking internal systems to AWS Cloud resources?", answers: ["Community", "Hybrid", "Cloud-based", "On-premises"], correct: "Hybrid" },
-            { question: "Which component is used to apply the web application firewall (WAF)?", answers: ["Security groups", "Network access control lists (NACLS)", "Web access control lists (web ACLS)", "Elastic network interfaces (ENIs)"], correct: "Web access control lists (web ACLS)" },
-            { question: "Which term describes the accountability of operations and security between the provider and consumer depending on the type and level of service?", answers: ["Memorandum of Understanding (MoU)", "Risk treatment", "Shared responsibility model", "Service Level Agreement (SLA)"], correct: "Shared responsibility model" },
+</div>
 
-            // New 10
-            { question: "Which AWS cloud service provides virtualized computing resources over the internet?", answers: ["SaaS", "PaaS", "IaaS", "CaaS"], correct: "IaaS" },
-            { question: "Which cloud service type allows DevOps teams to focus on the rapid and efficient deployment of apps, managed databases, containers, and microservices?", answers: ["SaaS", "PaaS", "IaaS", "FaaS"], correct: "PaaS" },
-            { question: "What term describes the cloud feature that allows resources to automatically scale up or down based on demand?", answers: ["Elasticity", "High Availability", "Durability", "Redundancy"], correct: "Elasticity" },
-            { question: "As of 2022, every AWS Region has at least how many Availability Zones?", answers: ["1", "2", "3", "4"], correct: "2" },
-            { question: "Which cloud service type provides a platform to develop, run, and manage applications without managing the underlying infrastructure?", answers: ["IaaS", "PaaS", "SaaS", "CaaS"], correct: "PaaS" },
-            { question: "What does SaaS stand for?", answers: ["System as a Service", "Software as a Service", "Storage as a Service", "Security as a Service"], correct: "Software as a Service" },
-            { question: "Which AWS cloud service provides compute, storage, and networking resources in a highly scalable way?", answers: ["IaaS", "SaaS", "PaaS", "FaaS"], correct: "IaaS" },
-            { question: "Which AWS pricing tool helps estimate costs for different cloud services?", answers: ["Cost Explorer", "Pricing Calculator", "Billing Dashboard", "Trusted Advisor"], correct: "Pricing Calculator" },
-            { question: "Which AWS cloud concept ensures that data is stored in multiple locations for fault tolerance?", answers: ["Redundancy", "Elasticity", "Availability Zone", "Shared Responsibility"], correct: "Redundancy" },
-            { question: "Which AWS service allows you to deploy and manage serverless applications?", answers: ["Lambda", "EC2", "S3", "RDS"], correct: "Lambda" }
-        ];
+<script>
+const questions = [
+    { question: "What does SaaS stand for?", answers: ["Software as a Service", "System as a Service", "Service and Software", "Solution as a Service"], correct: "Software as a Service" },
+    { question: "Which AWS service provides monitoring and logs?", answers: ["CloudWatch", "CloudTrail", "CloudFront", "Trusted Advisor"], correct: "CloudWatch" },
+    { question: "Which AWS cloud service allows DevOps teams to deploy apps rapidly?", answers: ["SaaS", "PaaS", "IaaS", "CaaS"], correct: "PaaS" },
+    { question: "As of 2022, every AWS Region has at least how many Availability Zones?", answers: ["1", "2", "3", "4"], correct: "2" },
+    { question: "Which AWS service detects unusual API activity?", answers: ["CloudTrail", "CloudWatch", "CloudFormation", "Trusted Advisor"], correct: "CloudTrail" },
+    { question: "Which cloud service provides virtualized computing resources?", answers: ["IaaS", "PaaS", "SaaS", "CaaS"], correct: "IaaS" },
+    { question: "Which AWS service is used for deploying containers?", answers: ["ECS", "S3", "RDS", "Lambda"], correct: "ECS" },
+    { question: "Which model describes accountability shared between provider and customer?", answers: ["SLA", "Shared responsibility", "MoU", "Risk treatment"], correct: "Shared responsibility" },
+    { question: "Which AWS service helps with web application firewall?", answers: ["Security Groups", "Web ACLs", "NACLs", "ENIs"], correct: "Web ACLs" },
+    { question: "Which AWS tool helps estimate costs of cloud services?", answers: ["Pricing Calculator", "CloudWatch", "CloudFormation", "Trusted Advisor"], correct: "Pricing Calculator" }
+];
 
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let userResponses = [];
-        let userName = '';
+let currentQuestionIndex = 0;
+let score = 0;
+let userResponses = [];
+let userName = '';
 
-        // UI elements
-        const nameInputSection = document.getElementById('name-input-section');
-        const usernameInput = document.getElementById('username-input');
-        const submitNameButton = document.getElementById('submit-name-button');
-        const descriptionSection = document.getElementById('description-section');
-        const quizSection = document.getElementById('quiz-section');
-        const resultsSection = document.getElementById('results-section');
-        const startButton = document.getElementById('start-button');
-        const questionNumberSpan = document.getElementById('question-number');
-        const totalQuestionsSpan = document.getElementById('total-questions');
-        const questionText = document.getElementById('question-text');
-        const answersContainer = document.getElementById('answers-container');
-        const nextButton = document.getElementById('next-button');
-        const scoreText = document.getElementById('score-text');
-        const reviewContainer = document.getElementById('review-container');
-        const restartButton = document.getElementById('restart-button');
-        const leaderboardBody = document.getElementById('leaderboard-body');
+const nameInputSection = document.getElementById('name-input-section');
+const usernameInput = document.getElementById('username-input');
+const submitNameButton = document.getElementById('submit-name-button');
+const descriptionSection = document.getElementById('description-section');
+const quizSection = document.getElementById('quiz-section');
+const resultsSection = document.getElementById('results-section');
+const startButton = document.getElementById('start-button');
+const questionNumberSpan = document.getElementById('question-number');
+const totalQuestionsSpan = document.getElementById('total-questions');
+const questionText = document.getElementById('question-text');
+const answersContainer = document.getElementById('answers-container');
+const nextButton = document.getElementById('next-button');
+const scoreText = document.getElementById('score-text');
+const reviewContainer = document.getElementById('review-container');
+const restartButton = document.getElementById('restart-button');
+const leaderboardBody = document.getElementById('leaderboard-body');
 
-        const modal = document.getElementById('custom-alert-modal');
-        const modalMessage = document.getElementById('modal-message');
-        const modalCloseButton = document.getElementById('modal-close-button');
+const modal = document.getElementById('custom-alert-modal');
+const modalMessage = document.getElementById('modal-message');
+const modalCloseButton = document.getElementById('modal-close-button');
 
-        modalCloseButton.addEventListener('click', () => { modal.style.display = 'none'; });
+function showModal(message){
+    modalMessage.textContent = message;
+    modal.style.display = 'flex';
+}
+modalCloseButton.addEventListener('click', () => modal.style.display='none');
 
-        totalQuestionsSpan.textContent = questions.length;
+submitNameButton.addEventListener('click', ()=>{
+    const name = usernameInput.value.trim();
+    if(name){ userName=name; nameInputSection.classList.add('hidden'); descriptionSection.classList.remove('hidden'); }
+    else showModal("Please enter your name to continue.");
+});
 
-        submitNameButton.addEventListener('click', () => {
-            const name = usernameInput.value.trim();
-            if (name) {
-                userName = name;
-                nameInputSection.classList.add('hidden');
-                descriptionSection.classList.remove('hidden');
-            } else {
-                modalMessage.textContent = "Please enter your name to continue.";
-                modal.style.display = 'flex';
-            }
+totalQuestionsSpan.textContent = questions.length;
+
+startButton.addEventListener('click', ()=>{
+    descriptionSection.classList.add('hidden');
+    quizSection.classList.remove('hidden');
+    currentQuestionIndex=0;
+    score=0;
+    userResponses=[];
+    showQuestion();
+});
+
+function showQuestion(){
+    const q = questions[currentQuestionIndex];
+    questionNumberSpan.textContent = currentQuestionIndex+1;
+    questionText.textContent = q.question;
+    answersContainer.innerHTML = '';
+    q.answers.forEach(a=>{
+        const btn=document.createElement('button');
+        btn.textContent=a;
+        btn.className='w-full bg-white text-left p-4 rounded-xl shadow-sm hover:bg-indigo-100 hover:text-indigo-800 transition-colors duration-200 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500';
+        btn.onclick=()=>selectAnswer(a, btn);
+        answersContainer.appendChild(btn);
+    });
+    nextButton.disabled=true;
+    nextButton.classList.add('cursor-not-allowed','bg-gray-300','text-gray-700');
+    nextButton.classList.remove('bg-indigo-600','hover:bg-indigo-700','text-white');
+}
+
+function selectAnswer(answer, btn){
+    const q = questions[currentQuestionIndex];
+    const buttons = answersContainer.querySelectorAll('button');
+    buttons.forEach(b=>b.disabled=true);
+    buttons.forEach(b=>{
+        if(b.textContent===q.correct) b.classList.add('bg-green-100','text-green-800','border-green-400');
+        else if(b.textContent===answer) b.classList.add('bg-red-100','text-red-800','border-red-400');
+    });
+    if(answer===q.correct) score++;
+    userResponses[currentQuestionIndex]={question:q.question, selected:answer, correct:q.correct, isCorrect:answer===q.correct};
+    nextButton.disabled=false;
+    nextButton.classList.remove('cursor-not-allowed','bg-gray-300','text-gray-700');
+    nextButton.classList.add('bg-indigo-600','hover:bg-indigo-700','text-white');
+}
+
+nextButton.addEventListener('click', ()=>{
+    currentQuestionIndex++;
+    if(currentQuestionIndex<questions.length) showQuestion();
+    else showResults();
+});
+
+function showResults(){
+    quizSection.classList.add('hidden');
+    resultsSection.classList.remove('hidden');
+    scoreText.textContent=`Your score is: ${score} out of ${questions.length}`;
+    reviewContainer.innerHTML='';
+    userResponses.forEach((r,i)=>{
+        const div=document.createElement('div');
+        div.className='bg-gray-50 p-4 rounded-xl';
+        div.innerHTML=`<p class="font-semibold mb-2">Question ${i+1}: ${r.question}</p>
+        <p class="text-sm ${r.isCorrect?'text-green-600':'text-red-600'}">Your answer: ${r.selected} (${r.isCorrect?'Correct':'Incorrect'})</p>
+        <p class="text-green-600 text-sm">Correct answer: ${r.correct}</p>`;
+        reviewContainer.appendChild(div);
+    });
+    saveLeaderboard();
+}
+
+function saveLeaderboard(){
+    let leaderboard=JSON.parse(localStorage.getItem('awsQuizLeaderboard'))||[];
+    leaderboard.push({userName, score, totalQuestions:questions.length, timestamp:new Date().toISOString()});
+    leaderboard.sort((a,b)=>b.score-a.score);
+    localStorage.setItem('awsQuizLeaderboard', JSON.stringify(leaderboard));
+    loadLeaderboard();
+}
+    function loadLeaderboard(){
+    const leaderboard = JSON.parse(localStorage.getItem('awsQuizLeaderboard')) || [];
+    leaderboardBody.innerHTML = '';
+    if(leaderboard.length === 0){
+        const row = document.createElement('tr');
+        row.innerHTML = `<td colspan="3" class="px-4 py-2 text-center text-gray-500">No scores yet. Be the first to play!</td>`;
+        leaderboardBody.appendChild(row);
+    } else {
+        leaderboard.forEach(entry => {
+            const row = document.createElement('tr');
+            const userCell = document.createElement('td');
+            userCell.className = 'px-4 py-2 border-b border-gray-200';
+            userCell.setAttribute('data-label','User');
+            userCell.textContent = entry.userName;
+
+            const scoreCell = document.createElement('td');
+            scoreCell.className = 'px-4 py-2 border-b border-gray-200 text-center';
+            scoreCell.setAttribute('data-label','Score');
+            scoreCell.textContent = `${entry.score} / ${entry.totalQuestions}`;
+
+            const dateCell = document.createElement('td');
+            dateCell.className = 'px-4 py-2 border-b border-gray-200 text-right';
+            dateCell.setAttribute('data-label','Date');
+            dateCell.textContent = new Date(entry.timestamp).toLocaleString();
+
+            row.appendChild(userCell);
+            row.appendChild(scoreCell);
+            row.appendChild(dateCell);
+            leaderboardBody.appendChild(row);
         });
+    }
+}
 
-        function showQuestion() {
-            const current = questions[currentQuestionIndex];
-            questionNumberSpan.textContent = currentQuestionIndex + 1;
-            questionText.textContent = current.question;
-            answersContainer.innerHTML = '';
-
-            current.answers.forEach(answer => {
-                const button = document.createElement('button');
-                button.textContent = answer;
-                button.className = 'w-full bg-white text-left p-4 rounded-xl shadow-sm hover:bg-indigo-100 hover:text-indigo-800 transition-colors duration-200 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500';
-                button.onclick = () => selectAnswer(answer, button);
-                answersContainer.appendChild(button);
-            });
-
-            nextButton.disabled = true;
-            nextButton.classList.add('cursor-not-allowed', 'bg-gray-300', 'text-gray-700');
-            nextButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'text-white');
-        }
-
-        function selectAnswer(answer, btn) {
-            const current = questions[currentQuestionIndex];
-            const buttons = answersContainer.querySelectorAll('button');
-
-            buttons.forEach(b => {
-                b.disabled = true;
-                if (b.textContent === current.correct) b.classList.add('bg-green-100', 'text-green-800', 'border-green-400');
-                if (b.textContent === answer && answer !== current.correct) b.classList.add('bg-red-100', 'text-red-800', 'border-red-400');
-            });
-
-            const correct = answer === current.correct;
-            if (correct) score++;
-
-            userResponses[currentQuestionIndex] = { question: current.question, selected: answer, correct: current.correct, isCorrect: correct };
-
-            nextButton.disabled = false;
-            nextButton.classList.remove('cursor-not-allowed', 'bg-gray-300', 'text-gray-700');
-            nextButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700', 'text-white');
-        }
-
-        function showResults() {
-            quizSection.classList.add('hidden');
-            resultsSection.classList.remove('hidden');
-            scoreText.textContent = `Your score is: ${score} out of ${questions.length}`;
-
-            reviewContainer.innerHTML = '';
-            userResponses.forEach((r, i) => {
-                const div = document.createElement('div');
-                div.className = 'bg-gray-50 p-4 rounded-xl';
-                div.innerHTML = `<p class="font-semibold mb-2">Question ${i+1}: ${r.question}</p>
-                <p class="${r.isCorrect ? 'text-green-600' : 'text-red-600'} text-sm">Your answer: ${r.selected} (${r.isCorrect ? 'Correct' : 'Incorrect'})</p>
-                <p class="text-green-600 text-sm">Correct answer: ${r.correct}</p>`;
-                reviewContainer.appendChild(div);
-            });
-            saveResults();
-        }
-
-        function saveResults() {
-            let leaderboard = JSON.parse(localStorage.getItem('awsQuizLeaderboard')) || [];
-            leaderboard.push({ userName, score, totalQuestions: questions.length, timestamp: new Date().toISOString() });
-            leaderboard.sort((a,b) => b.score - a.score);
-            localStorage.setItem('awsQuizLeaderboard', JSON.stringify(leaderboard));
-            loadLeaderboard();
-        }
-
-        function loadLeaderboard() {
-            const leaderboard = JSON.parse(localStorage.getItem('awsQuizLeaderboard')) || [];
-            leaderboardBody.innerHTML = '';
-            if (leaderboard.length === 0) {
-                leaderboardBody.innerHTML = `<tr><td colspan="3" class="px-4 py-2 text-center text-gray-500">No scores yet. Be the first to play!</td></tr>`;
-            } else {
-                leaderboard.forEach(entry => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `<td class="px-4 py-2 border-b border-gray-200" data-label="User">${entry.userName}</td>
-                    <td class="px-4 py-2 border-b border-gray-200 text-center" data-label="Score">${entry.score} / ${entry.totalQuestions}</td>
-                    <td class="px-4 py-2 border-b border-gray-200 text-right" data-label="Date">${new Date(entry.timestamp).toLocaleString()}</td>`;
-                    leaderboardBody.appendChild(row);
-                });
-            }
-        }
-
-        startButton.addEventListener('click', () => {
-            descriptionSection.classList.add('hidden');
-            quizSection.classList.remove('hidden');
-            currentQuestionIndex = 0;
-            score = 0;
-            userResponses = [];
-            showQuestion();
-        });
-
-        restartButton.addEventListener('click', () => {
-            resultsSection.classList.add('hidden');
-            nameInputSection.classList.remove('hidden');
-            usernameInput.value = '';
-        });
-
-        nextButton.addEventListener('click', () => {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) showQuestion();
-            else showResults();
-        });
-    </script>
+restartButton.addEventListener('click', ()=>{
+    resultsSection.classList.add('hidden');
+    nameInputSection.classList.remove('hidden');
+    usernameInput.value='';
+});
+</script>
 </body>
 </html>
