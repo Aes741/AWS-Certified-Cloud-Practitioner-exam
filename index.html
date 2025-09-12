@@ -34,7 +34,6 @@
             width: 400px;
         }
 
-        /* Responsive table styles */
         @media (max-width: 640px) {
             .leaderboard-table th, .leaderboard-table td {
                 display: block;
@@ -60,7 +59,6 @@
         <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-indigo-700">AWS Cloud Practitioner Challenge</h1>
         <p class="text-center text-gray-600 mb-8 text-sm sm:text-base">Get ready for the AWS exam with this Q&A game!</p>
 
-        <!-- Name Input Section -->
         <div id="name-input-section" class="flex flex-col items-center mb-8">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Enter Your Name</h2>
             <input type="text" id="username-input" class="w-full max-w-sm p-3 border border-gray-300 rounded-lg text-lg mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Your Name">
@@ -69,7 +67,6 @@
             </button>
         </div>
 
-        <!-- Game Description Section (Initially hidden) -->
         <div id="description-section" class="hidden">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Game Description</h2>
             <p class="text-gray-700 leading-relaxed text-sm sm:text-base mb-4">
@@ -90,7 +87,6 @@
             </div>
         </div>
 
-        <!-- Quiz Section (Initially hidden) -->
         <div id="quiz-section" class="hidden">
             <div class="mb-6 bg-indigo-50 p-4 rounded-xl">
                 <p class="text-indigo-700 text-center font-bold text-lg"><span id="question-number">1</span> of <span id="total-questions">5</span></p>
@@ -106,7 +102,6 @@
             </div>
         </div>
 
-        <!-- Results Section (Initially hidden) -->
         <div id="results-section" class="hidden text-center">
             <h2 class="text-3xl font-bold text-indigo-700 mb-4">Game Over!</h2>
             <p id="score-text" class="text-2xl font-semibold mb-4 text-gray-800"></p>
@@ -117,7 +112,6 @@
             </button>
         </div>
 
-        <!-- Leaderboard section -->
         <div id="leaderboard-section" class="mt-8">
             <h2 class="text-2xl font-semibold text-center mb-4 text-gray-800">Leaderboard</h2>
             <table class="w-full text-left table-auto border-collapse border border-gray-200 rounded-lg leaderboard-table">
@@ -133,11 +127,9 @@
             </table>
         </div>
         
-        <!-- Footer with creator's name -->
         <p class="text-center text-sm text-gray-400 mt-8">Created by Adrian Saltos</p>
     </div>
 
-    <!-- Custom Modal -->
     <div id="custom-alert-modal" class="modal">
         <div class="modal-content">
             <div class="flex flex-col items-center">
@@ -149,35 +141,18 @@
         </div>
     </div>
     
-    <!-- Local Storage Logic -->
     <script>
-        const gameName = "AWS Cloud Practitioner Challenge";
         const questions = [
-            {
-                question: "What is the native AWS monitoring service for gathering and displaying actionable reports and meaningful metrics for AWS workloads?",
-                answers: ["CloudTrail", "CloudFormation", "CloudWatch", "CloudFront"],
-                correct: "CloudWatch"
-            },
-            {
-                question: "Which AWS service offers 'insights' to automatically detect unusual API activities in AWS accounts?",
-                answers: ["CloudTrail", "Trusted Advisor", "CloudFront", "CloudWatch"],
-                correct: "CloudTrail"
-            },
-            {
-                question: "Which AWS cloud deployment model is most often used to migrate, expand, or grow infrastructure into a cloud solution while linking internal systems to AWS Cloud resources?",
-                answers: ["Community", "Hybrid", "Cloud-based", "On-premises"],
-                correct: "Hybrid"
-            },
-            {
-                question: "Which component is used to apply the web application firewall (WAF)?",
-                answers: ["Security groups", "Network access control lists (NACLS)", "Web access control lists (web ACLS)", "Elastic network interfaces (ENIs)"],
-                correct: "Web access control lists (web ACLS)"
-            },
-            {
-                question: "Which term describes the accountability of operations and security between the provider and consumer depending on the type and level of service?",
-                answers: ["Memorandum of Understanding (MoU)", "Risk treatment", "Shared responsibility model", "Service Level Agreement (SLA)"],
-                correct: "Shared responsibility model"
-            }
+            { question: "Which AWS cloud service provides virtualized computing resources over the internet?", answers: ["SaaS", "PaaS", "IaaS", "CaaS"], correct: "IaaS" },
+            { question: "Which cloud service type allows DevOps teams to focus on the rapid and efficient deployment of apps, managed databases, containers, and microservices?", answers: ["SaaS", "PaaS", "IaaS", "FaaS"], correct: "PaaS" },
+            { question: "What term describes the cloud feature that allows resources to automatically scale up or down based on demand?", answers: ["Elasticity", "High Availability", "Durability", "Redundancy"], correct: "Elasticity" },
+            { question: "Which AWS cloud deployment model is most often used to migrate, expand, or grow infrastructure into a cloud solution while linking internal systems to AWS Cloud resources?", answers: ["Community", "Hybrid", "Cloud-based", "On-premises"], correct: "Hybrid" },
+            { question: "As of 2022, every AWS Region has at least how many Availability Zones?", answers: ["1", "2", "3", "4"], correct: "2" },
+            { question: "Which cloud service type provides a platform to develop, run, and manage applications without managing the underlying infrastructure?", answers: ["IaaS", "PaaS", "SaaS", "CaaS"], correct: "PaaS" },
+            { question: "What does SaaS stand for?", answers: ["System as a Service", "Software as a Service", "Storage as a Service", "Security as a Service"], correct: "Software as a Service" },
+            { question: "Which AWS cloud service provides compute, storage, and networking infrastructure for customers to use on-demand?", answers: ["IaaS", "PaaS", "SaaS", "FaaS"], correct: "IaaS" },
+            { question: "What term describes the speed and flexibility a business gains by using cloud computing?", answers: ["Elasticity", "Agility", "Scalability", "Resiliency"], correct: "Agility" },
+            { question: "In the AWS Pricing Calculator, what is listed in the Service Name column of the estimate which has just been created?", answers: ["The AWS service being estimated (e.g., EC2, S3)", "The estimated cost", "The number of resources", "The region selected"], correct: "The AWS service being estimated (e.g., EC2, S3)" }
         ];
 
         let currentQuestionIndex = 0;
@@ -185,7 +160,6 @@
         let userResponses = [];
         let userName = '';
 
-        // UI elements
         const nameInputSection = document.getElementById('name-input-section');
         const usernameInput = document.getElementById('username-input');
         const submitNameButton = document.getElementById('submit-name-button');
@@ -203,8 +177,7 @@
         const restartButton = document.getElementById('restart-button');
         const leaderboardSection = document.getElementById('leaderboard-section');
         const leaderboardBody = document.getElementById('leaderboard-body');
-        
-        // Modal elements
+
         const modal = document.getElementById('custom-alert-modal');
         const modalMessage = document.getElementById('modal-message');
         const modalCloseButton = document.getElementById('modal-close-button');
@@ -217,11 +190,10 @@
         modalCloseButton.addEventListener('click', () => {
             modal.style.display = 'none';
         });
-        
+
         totalQuestionsSpan.textContent = questions.length;
         loadLeaderboard();
 
-        // Listener for the name submission button
         submitNameButton.addEventListener('click', () => {
             const name = usernameInput.value.trim();
             if (name) {
@@ -267,16 +239,9 @@
             });
             
             const isCorrect = selectedAnswer === currentQuestion.correct;
-            if (isCorrect) {
-                score++;
-            }
+            if (isCorrect) score++;
 
-            userResponses[currentQuestionIndex] = {
-                question: currentQuestion.question,
-                selected: selectedAnswer,
-                correct: currentQuestion.correct,
-                isCorrect: isCorrect
-            };
+            userResponses[currentQuestionIndex] = { question: currentQuestion.question, selected: selectedAnswer, correct: currentQuestion.correct, isCorrect: isCorrect };
 
             nextButton.disabled = false;
             nextButton.classList.remove('cursor-not-allowed', 'bg-gray-300', 'text-gray-700');
@@ -322,33 +287,22 @@
 
         function saveResults() {
             let leaderboard = JSON.parse(localStorage.getItem('awsQuizLeaderboard')) || [];
-            
-            leaderboard.push({
-                userName: userName,
-                score: score,
-                totalQuestions: questions.length,
-                timestamp: new Date().toISOString()
-            });
-
+            leaderboard.push({ userName, score, totalQuestions: questions.length, timestamp: new Date().toISOString() });
             leaderboard.sort((a, b) => b.score - a.score);
-
             localStorage.setItem('awsQuizLeaderboard', JSON.stringify(leaderboard));
-            
             loadLeaderboard();
         }
         
         function loadLeaderboard() {
             const leaderboard = JSON.parse(localStorage.getItem('awsQuizLeaderboard')) || [];
-            
             leaderboardBody.innerHTML = '';
             if (leaderboard.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = `<td colspan="3" class="px-4 py-2 text-center text-gray-500">No scores yet. Be the first to play!</td>`;
                 leaderboardBody.appendChild(row);
             } else {
-                leaderboard.forEach((entry) => {
+                leaderboard.forEach(entry => {
                     const row = document.createElement('tr');
-                    
                     const userNameCell = document.createElement('td');
                     userNameCell.classList.add('px-4', 'py-2', 'border-b', 'border-gray-200');
                     userNameCell.textContent = entry.userName;
